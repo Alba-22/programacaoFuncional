@@ -59,7 +59,7 @@ gera1 :: [Int]
 gera1 = [x ^ 3 | x <- list, even(x), x > 3, x < 11]
 
 gera2 :: [(Int, Int)]
-gera2 = [(x, y) | x <- list, y <- list, x <= 5, y > 5, y < x * 3 ]
+gera2 = [(x, y) | x <- list, y <- list, x <= 5, y > x, y < x * 3 ]
 
 l1 = [15, 16]
 gera3_aux :: [Int] -> [Int]
@@ -70,7 +70,7 @@ gera3 :: [Int]
 gera3 = gera3_aux l1
 
 gera4 :: [(Int, Int)]
-gera4 = [(x, x + 1) | x <- [1..10], even(x)]
+gera4 = [(x, x + 1) | x <- [1..10], even(x), x < 10]
 
 gera5 :: [Int]
 gera5 = [x + y | (x, y) <- gera4]
