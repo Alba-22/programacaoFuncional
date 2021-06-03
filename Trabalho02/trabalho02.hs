@@ -38,6 +38,9 @@ trocas ((x:y:zs),i)
 bolhaV1 [] = ([],0)
 bolhaV1 lista = bolhaOrdV1 lista 0 (length lista)
 
+-- Em uma iteração, irá comprarar se o contador antes da iteração 
+-- é igual ao valor após a iteração, caso seja, 
+-- para o algoritmo pois a lista já está ordenada.
 bolhaOrdV1 lista i 0 = (lista,i)
 bolhaOrdV1 lista i n
   | i == j = (lista, j)
@@ -55,6 +58,12 @@ trocasV1 ((x:y:zs),i)
 bolhaV2 [] = ([],0)
 bolhaV2 lista = bolhaOrdV2 lista 0 (length lista)
 
+-- take: pegará os primeiros (n-1) elementos da lista, ou seja, todos menos o último
+-- let bizarro dentro do otherwise:
+-- vai chamar o bolhaOrdV2 passando a lista sem o último elemento, o contador incrementado e o (n-1)
+-- na expressão em que retornasse uma tupla, cujo primeiro valor é a lista ordenada sem o último elemento,
+-- concatenada com o último elemento(que já está na posição certa), e cujo segundo elemento é o segundo item
+--  da tupla resultante do bolhaOrdV2, que é o contador.
 bolhaOrdV2 lista i 0 = (lista,i)
 bolhaOrdV2 lista i n
   | i == j = (lista, j)
@@ -73,6 +82,10 @@ trocasV2 ((x:y:zs),i)
 selecao :: Ord a => [a] -> ([a], Int)
 selecao xs = selecaoAux (xs, 0)
 
+-- x será o menor elemento da lista, e na variável tupla será armazenada a lista sem o elemento x
+-- de forma que na expressão será formada uma nova tupla concantenando o x(menor elemento) com o primeiro
+-- valor da tupla(resultado da operação sobre o resto da lista), e o no segundo valor da tupla terá o contador
+-- da operação anterior adicionado de + 1 caso o x(menor elemento) não seja o primeiro da lista.
 selecaoAux :: (Ord a) => ([a], Int) -> ([a], Int)
 selecaoAux ([], c) = ([], c)
 selecaoAux (xs, c) = 
@@ -97,6 +110,7 @@ minimo (x:xs)
 selecaoV1 :: Ord a => [a] -> ([a], Int)
 selecaoV1 xs = selecaoAuxV1 (xs, 0)
 
+-- Mesma coisa que no anterior, porém, o resultado da tupla vem numa função só
 selecaoAuxV1 :: (Ord a) => ([a], Int) -> ([a], Int)
 selecaoAuxV1 ([], c) = ([], c)
 selecaoAuxV1 (xs, c) = 
@@ -104,6 +118,9 @@ selecaoAuxV1 (xs, c) =
       tupla = selecaoAuxV1 (restoLista, c)
   in ([menor] ++ fst tupla, snd tupla + if menor == head (xs) then 0 else 1)
 
+-- Por meio do where, é feita a chamada recursiva da função removeMenorV1 para toda a lista,
+-- de forma que, ao final desse percorrimento, na percurso de volta da recursão é feita a 
+-- comparação se x é menor que o menor elemento do resto da lista.
 removeMenorV1 :: Ord a => [a] -> (a, [a])
 removeMenorV1 [] = undefined
 removeMenorV1 [x] = (x, [])
@@ -116,6 +133,9 @@ removeMenorV1 (x:xs)
 selecaoV2 :: Ord a => [a] -> ([a], Int)
 selecaoV2 xs = selecaoAuxV2 (xs, 0)
 
+-- Será semelhante a implementação original, porém o valor retornado em x(menor elemento) não
+-- utilizado a função minimo, e sim uma foldr1(sem valor default) passando a função min(do próprio Haskell)
+-- para fazer a comparação 2 a 2 na lista e retornar o menor elemento.
 selecaoAuxV2 :: (Ord a) => ([a], Int) -> ([a], Int)
 selecaoAuxV2 ([], c) = ([], c)
 selecaoAuxV2 (xs, c) = 
@@ -131,12 +151,21 @@ removeV2 a (x:xs)
 
 
 -- EXERCICIO 03
+-- A função insere chama a ela mesma para o resto da lista, de forma a retornar a lista ordenada de todos os elementos,
+-- exceto o primeiro e a quantidade de trocas necessárias para tal operação. Após isso, é feita a inserção do primeiro
+-- na lista ordenada, em que retorna-se a lista ordenada final e a quantidade de trocas necessárias para essa inserção
+-- e soma-se esse valor com a quantidade de trocas necessárias para o restante da lista.
 insercao :: (Ord a) => [a] -> ([a], Int)
 insercao [] = ([], 0)
 insercao (x:xs) = (listaOrdenada, contador + contResto)
   where (listaOrdenada, contador) = insereOrd x (restoOrdenada)
         (restoOrdenada, contResto) = insercao xs
 
+-- Insere um elemento numa lista já ordenada, de forma que se o primeiro elemento(x)
+-- for menor que o segundo(y), ele colocado ao inicio da lista e incrementa-se o contador em 1
+-- Caso contrário, insereOrd é chamado de forma recursiva para o resto da lista e o segundo elemento
+-- é concatenado com a lista resultante da chamada recursiva e incrementa-se 1 ao valor do contador
+-- vindo da chamada recursiva.
 insereOrd :: (Ord a) => a -> [a] -> ([a], Int)
 insereOrd x [] = ([x], 0)
 insereOrd x (y:ys)
@@ -144,8 +173,11 @@ insereOrd x (y:ys)
   | otherwise = (y:(resto), contResto + 1)
   where (resto, contResto) = insereOrd x ys
 
-
 -- Variação 1 Insertion Sort:
+-- Dentro da função lambda passada para o foldr, occorre a inserção ordenada com contador.
+-- Como foi utilizado foldr, a operação vai começar com o valor padrão ([], 0) como um acumulador
+-- e vai chamando de trás pra frente a função passando o elemento da lista e a tupla do acumulador.
+-- Nessa tupla então é substituido com o resultado do inseredOrd e o contador incrementado.
 insercaoV1 :: Ord a => [a] -> ([a], Int)
 insercaoV1 xs = foldr (\elem -> \(restoOrdenada, contResto) -> 
     let (listaOrdenada, contador) = insereOrd elem (restoOrdenada) 
